@@ -8,8 +8,9 @@ const NAME: (u32, u32) = (0, 4);
 const SIZE: (u32, u32) = (9, 20);
 const ALIGNMENT: (u32, u32) = (10, 20);
 const TYPE: (u32, u32) = (11, 20);
-const ARMOR_CLASS: (u32, u32) = (26, 17);
+const ARMOR_CLASS: (u32, u32) = (28, 17);
 const ARMOR: (u32, u32) = (32, 14);
+const SAVE_DC: (u32, u32) = (28, 16);
 const HIT_POINTS: (u32, u32) = (1, 15);
 const HIT_DICE: (u32, u32) = (1, 16);
 const STRENGTH: (u32, u32) = (2, 20);
@@ -54,6 +55,7 @@ struct Monster {
     malign: String,
     mac: String,
     marmor: String,
+    mdc: String,
     mhp: String,
     mhd: String,
     mstr: String,
@@ -96,6 +98,7 @@ impl Monster {
             malign: "".to_string(),
             mac: "".to_string(),
             marmor: "".to_string(),
+            mdc: "".to_string(),
             mhp: "".to_string(),
             mhd: "".to_string(),
             mstr: "".to_string(),
@@ -139,6 +142,7 @@ struct MonsterAttack {
     maab: String,
     mareach: String,
     madamagecode: String,
+    masavedc: String,
 }
 
 impl MonsterAttack {
@@ -150,6 +154,7 @@ impl MonsterAttack {
             maab: get_value(r, (pos.0, pos.1 + 2)),
             mareach: get_value(r, (pos.0, pos.1 + 3)),
             madamagecode: get_value(r, (pos.0, pos.1 + 5)),
+            masavedc: get_value(r, SAVE_DC),
         };
         if ma.madamagecode.len() > 0 {
             ma.valid = true;
@@ -171,7 +176,6 @@ impl MonsterAttack {
 
 fn get_value(r: &Range<DataType>, pos: (u32, u32)) -> String {
     let v = r.get_value(pos).unwrap();
-    println!("{:?}", v);
 
     if v.is_string() {
         v.to_string()
@@ -200,9 +204,13 @@ fn get_vertical_values(r: &Range<DataType>, pos: (u32, u32), rows: u32) -> Vec<S
     values
 }
 
-fn write_standard_monster(monster: Monster) {
+fn write_monster(monster: Monster, wide: bool) {
     println!("___");
-    println!("{{{{monster,frame");
+    if wide {
+        println!("{{{{monster,frame,wide");
+    } else {
+        println!("{{{{monster,frame");
+    }
 
     println!("## {}", monster.mname);
     println!("*{} {}, {}*", monster.msize, monster.mtype, monster.malign);
@@ -257,22 +265,30 @@ fn write_standard_monster(monster: Monster) {
         println!(":");
     }
     println!("### Actions");
+    println!(":");
     for ability in monster.mattacks {
         if ability.matype != "Spell" {
             println!(
                 "**{}** :: *{} weapon attack:* +{} to hit, {}, one target. *Hit* {}",
                 ability.maname, ability.matype, ability.maab, ability.mareach, ability.madamagecode
             );
+            println!(":");
         } else {
             println!(
-                "**{}** :: spell_description (range: {})",
-                ability.maname, ability.mareach
+                "**{}** :: spell_description (range: {}, damage: {}, type: {}, dc: {})",
+                ability.maname,
+                ability.mareach,
+                ability.madamagecode,
+                ability.matype,
+                ability.masavedc
             );
+            println!(":");
         }
     }
 
     if monster.mmythabilities.len() > 0 {
         println!("### Mythic Actions");
+        println!(":");
         for ability in monster.mmythabilities {
             println!("**{}** :: stuff", ability);
             println!(":");
@@ -281,6 +297,7 @@ fn write_standard_monster(monster: Monster) {
 
     if monster.mlegabilities.len() > 0 {
         println!("### Legendary Actions");
+        println!(":");
         for ability in monster.mlegabilities {
             println!("**{}** :: stuff", ability);
             println!(":");
@@ -289,6 +306,7 @@ fn write_standard_monster(monster: Monster) {
 
     if monster.mlairactions.len() > 0 {
         println!("### Lair Actions");
+        println!(":");
         for ability in monster.mlairactions {
             println!("**{}** :: stuff", ability);
             println!(":");
@@ -297,9 +315,18 @@ fn write_standard_monster(monster: Monster) {
     println!("}}}}");
 }
 
+fn write_standard_monster(monster: Monster) {
+    write_monster(monster, false);
+}
+
+fn write_wide_monster(monster: Monster) {
+    write_monster(monster, true);
+}
+
 fn main() {
     let mut filename: String = "".to_string();
     let mut verbose = false;
+    let mut wide = false;
     let mut monster: Monster = Monster::new();
     {
         // this block limits scope of borrows by ap.refer() method
@@ -307,6 +334,8 @@ fn main() {
         ap.set_description("Write a Homebrewery statblock from a monster excel file.");
         ap.refer(&mut filename)
             .add_option(&["-f", "--file"], Store, "Path to the excel file.");
+        ap.refer(&mut wide)
+            .add_option(&["-w", "--wide"], StoreTrue, "Print wide monster block.");
         ap.refer(&mut verbose).add_option(
             &["-v", "--verbose"],
             StoreTrue,
@@ -380,6 +409,10 @@ fn main() {
             println!("{:?}", monster);
         }
 
-        write_standard_monster(monster);
+        if wide {
+            write_wide_monster(monster);
+        } else {
+            write_standard_monster(monster);
+        }
     }
 }
