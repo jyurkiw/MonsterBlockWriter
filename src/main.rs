@@ -3,49 +3,7 @@ extern crate argparse;
 use argparse::{ArgumentParser, Store, StoreTrue};
 use calamine::{open_workbook, DataType, Range, Reader, Xlsx};
 
-// Excel position constants (row, column)
-const NAME: (u32, u32) = (0, 4);
-const SIZE: (u32, u32) = (9, 20);
-const ALIGNMENT: (u32, u32) = (10, 20);
-const TYPE: (u32, u32) = (11, 20);
-const ARMOR_CLASS: (u32, u32) = (28, 17);
-const ARMOR: (u32, u32) = (32, 14);
-const SAVE_DC: (u32, u32) = (28, 16);
-const HIT_POINTS: (u32, u32) = (1, 15);
-const HIT_DICE: (u32, u32) = (1, 16);
-const STRENGTH: (u32, u32) = (2, 20);
-const STRENGTH_BONUS: (u32, u32) = (2, 21);
-const DEXTERITY: (u32, u32) = (3, 20);
-const DEXTERITY_BONUS: (u32, u32) = (3, 21);
-const CONSTITUTION: (u32, u32) = (4, 20);
-const CONSTITUTION_BONUS: (u32, u32) = (4, 21);
-const INTELLIGENCE: (u32, u32) = (5, 20);
-const INTELLIGENCE_BONUS: (u32, u32) = (5, 21);
-const WISDOM: (u32, u32) = (6, 20);
-const WISDOM_BONUS: (u32, u32) = (6, 21);
-const CHARMISMA: (u32, u32) = (7, 20);
-const CHARMISMA_BONUS: (u32, u32) = (7, 21);
-const CONDITION_IMMUNITIES: (u32, u32) = (46, 7);
-const DAMAGE_RESISTANCES: (u32, u32) = (43, 7);
-const DAMAGE_IMMUNITIES: (u32, u32) = (44, 7);
-const DAMAGE_VULNERABILITIES: (u32, u32) = (45, 7);
-const SENSES: (u32, u32) = (49, 7);
-const LANGUAGES: (u32, u32) = (48, 7);
-const CHALLENGE_RATING: (u32, u32) = (21, 17);
-const XP_VALUE: (u32, u32) = (1, 11);
-const LEGENDARY_RESISTANCES: (u32, u32) = (13, 14);
-const ABILITIES: (u32, u32) = (56, 5);
-const NUM_ABILITIES: (u32, u32) = (55, 9);
-const LEGENDARY_ABILITIES: (u32, u32) = (56, 11);
-const NUM_LEGENDARY_ABILITIES: (u32, u32) = (55, 14);
-const MYTHIC_ABILITIES: (u32, u32) = (56, 16);
-const NUM_MYTHIC_ABILITIES: (u32, u32) = (55, 20);
-const LAIR_ACTIONS: (u32, u32) = (71, 5);
-const NUM_LAIR_ACTIONS: (u32, u32) = (70, 8);
-const SAVES: (u32, u32) = (51, 7);
-const SKILLS: (u32, u32) = (52, 7);
-const SPEED: (u32, u32) = (53, 7);
-const ATTACKS: (u32, u32) = (35, 18);
+mod constants;
 
 #[derive(Debug)]
 struct Monster {
@@ -154,7 +112,7 @@ impl MonsterAttack {
             maab: get_value(r, (pos.0, pos.1 + 2)),
             mareach: get_value(r, (pos.0, pos.1 + 3)),
             madamagecode: get_value(r, (pos.0, pos.1 + 5)),
-            masavedc: get_value(r, SAVE_DC),
+            masavedc: get_value(r, constants::SAVE_DC),
         };
         if ma.madamagecode.len() > 0 {
             ma.valid = true;
@@ -347,62 +305,68 @@ fn main() {
     let mut excel: Xlsx<_> = open_workbook(filename).unwrap();
 
     if let Some(Ok(r)) = excel.worksheet_range_at(0) {
-        monster.mname = get_value(&r, NAME);
-        monster.msize = get_value(&r, SIZE);
-        monster.mtype = get_value(&r, TYPE);
-        monster.malign = get_value(&r, ALIGNMENT);
-        monster.mac = get_value(&r, ARMOR_CLASS);
-        monster.marmor = get_value(&r, ARMOR);
-        monster.mhp = get_value(&r, HIT_POINTS);
-        monster.mhd = get_value(&r, HIT_DICE);
-        monster.mstr = get_value(&r, STRENGTH);
-        monster.mstrbns = get_value(&r, STRENGTH_BONUS);
-        monster.mdex = get_value(&r, DEXTERITY);
-        monster.mdexbns = get_value(&r, DEXTERITY_BONUS);
-        monster.mcon = get_value(&r, CONSTITUTION);
-        monster.mconbns = get_value(&r, CONSTITUTION_BONUS);
-        monster.mint = get_value(&r, INTELLIGENCE);
-        monster.mintbns = get_value(&r, INTELLIGENCE_BONUS);
-        monster.mwis = get_value(&r, WISDOM);
-        monster.mwisbns = get_value(&r, WISDOM_BONUS);
-        monster.mcha = get_value(&r, CHARMISMA);
-        monster.mchabns = get_value(&r, CHARMISMA_BONUS);
-        monster.mcdtnims = get_value(&r, CONDITION_IMMUNITIES);
-        monster.mdmgres = get_value(&r, DAMAGE_RESISTANCES);
-        monster.mdmgims = get_value(&r, DAMAGE_IMMUNITIES);
-        monster.mdmgvuln = get_value(&r, DAMAGE_VULNERABILITIES);
-        monster.msenses = get_value(&r, SENSES);
-        monster.mlanguages = get_value(&r, LANGUAGES);
-        monster.mcr = get_value(&r, CHALLENGE_RATING);
-        monster.mxp = get_value(&r, XP_VALUE);
-        monster.mlngresists = get_value(&r, LEGENDARY_RESISTANCES);
-        monster.msaves = get_value(&r, SAVES);
-        monster.mskills = get_value(&r, SKILLS);
-        monster.mspeed = get_value(&r, SPEED);
-        monster.mattacks = MonsterAttack::get_all(&r, ATTACKS);
+        monster.mname = get_value(&r, constants::NAME);
+        monster.msize = get_value(&r, constants::SIZE);
+        monster.mtype = get_value(&r, constants::TYPE);
+        monster.malign = get_value(&r, constants::ALIGNMENT);
+        monster.mac = get_value(&r, constants::ARMOR_CLASS);
+        monster.marmor = get_value(&r, constants::ARMOR);
+        monster.mhp = get_value(&r, constants::HIT_POINTS);
+        monster.mhd = get_value(&r, constants::HIT_DICE);
+        monster.mstr = get_value(&r, constants::STRENGTH);
+        monster.mstrbns = get_value(&r, constants::STRENGTH_BONUS);
+        monster.mdex = get_value(&r, constants::DEXTERITY);
+        monster.mdexbns = get_value(&r, constants::DEXTERITY_BONUS);
+        monster.mcon = get_value(&r, constants::CONSTITUTION);
+        monster.mconbns = get_value(&r, constants::CONSTITUTION_BONUS);
+        monster.mint = get_value(&r, constants::INTELLIGENCE);
+        monster.mintbns = get_value(&r, constants::INTELLIGENCE_BONUS);
+        monster.mwis = get_value(&r, constants::WISDOM);
+        monster.mwisbns = get_value(&r, constants::WISDOM_BONUS);
+        monster.mcha = get_value(&r, constants::CHARMISMA);
+        monster.mchabns = get_value(&r, constants::CHARMISMA_BONUS);
+        monster.mcdtnims = get_value(&r, constants::CONDITION_IMMUNITIES);
+        monster.mdmgres = get_value(&r, constants::DAMAGE_RESISTANCES);
+        monster.mdmgims = get_value(&r, constants::DAMAGE_IMMUNITIES);
+        monster.mdmgvuln = get_value(&r, constants::DAMAGE_VULNERABILITIES);
+        monster.msenses = get_value(&r, constants::SENSES);
+        monster.mlanguages = get_value(&r, constants::LANGUAGES);
+        monster.mcr = get_value(&r, constants::CHALLENGE_RATING);
+        monster.mxp = get_value(&r, constants::XP_VALUE);
+        monster.mlngresists = get_value(&r, constants::LEGENDARY_RESISTANCES);
+        monster.msaves = get_value(&r, constants::SAVES);
+        monster.mskills = get_value(&r, constants::SKILLS);
+        monster.mspeed = get_value(&r, constants::SPEED);
+        monster.mattacks = MonsterAttack::get_all(&r, constants::ATTACKS);
 
         // Get Action Names
         monster.mabilities = get_vertical_values(
             &r,
-            ABILITIES,
-            get_value(&r, NUM_ABILITIES).parse::<u32>().unwrap(),
+            constants::ABILITIES,
+            get_value(&r, constants::NUM_ABILITIES)
+                .parse::<u32>()
+                .unwrap(),
         );
         monster.mlegabilities = get_vertical_values(
             &r,
-            LEGENDARY_ABILITIES,
-            get_value(&r, NUM_LEGENDARY_ABILITIES)
+            constants::LEGENDARY_ABILITIES,
+            get_value(&r, constants::NUM_LEGENDARY_ABILITIES)
                 .parse::<u32>()
                 .unwrap(),
         );
         monster.mmythabilities = get_vertical_values(
             &r,
-            MYTHIC_ABILITIES,
-            get_value(&r, NUM_MYTHIC_ABILITIES).parse::<u32>().unwrap(),
+            constants::MYTHIC_ABILITIES,
+            get_value(&r, constants::NUM_MYTHIC_ABILITIES)
+                .parse::<u32>()
+                .unwrap(),
         );
         monster.mlairactions = get_vertical_values(
             &r,
-            LAIR_ACTIONS,
-            get_value(&r, NUM_LAIR_ACTIONS).parse::<u32>().unwrap(),
+            constants::LAIR_ACTIONS,
+            get_value(&r, constants::NUM_LAIR_ACTIONS)
+                .parse::<u32>()
+                .unwrap(),
         );
         if verbose {
             // Describe all gathered data.
